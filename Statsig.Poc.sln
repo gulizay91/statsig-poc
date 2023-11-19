@@ -1,0 +1,22 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Statsig.Console", "src\Statsig.Console\Statsig.Console.csproj", "{04F71121-32F7-47BF-9A33-39853CD6006A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Statsig.Api", "src\Statsig.Api\Statsig.Api.csproj", "{8C1C1109-E85D-448B-9C56-3C0E78DC0473}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{04F71121-32F7-47BF-9A33-39853CD6006A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{04F71121-32F7-47BF-9A33-39853CD6006A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{04F71121-32F7-47BF-9A33-39853CD6006A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{04F71121-32F7-47BF-9A33-39853CD6006A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8C1C1109-E85D-448B-9C56-3C0E78DC0473}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8C1C1109-E85D-448B-9C56-3C0E78DC0473}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8C1C1109-E85D-448B-9C56-3C0E78DC0473}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8C1C1109-E85D-448B-9C56-3C0E78DC0473}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
