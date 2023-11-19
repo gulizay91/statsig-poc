@@ -1,4 +1,6 @@
 # Statsig .NET SDK
+Before use [Statsig Server SDK .NET](https://docs.statsig.com/server/dotnetSDK). You can sign up [here](https://console.statsig.com/sign_up)
+
 Statsig server SDKs are sets of tools/methods for developing applications to run tests and are available to help developers integrate their services easily.
 
 ![Screenshot](https://github.com/gulizay91/statsig-poc/blob/main/etc/statsig-overview.png?raw=true)
@@ -85,6 +87,10 @@ StatsigServer.Shutdown();
 ## PrivateAttributes in FeatureGate & CustomEvent in Metrics
 You can use private attributes to hide private information when using private info as condition. PrivateAttributes will be sent with this call but will not be stored or logged on Statsig servers.
 First, create FeatureGate which name is "mastercard" and add a rule match regex for credit card number.
+Mastercard regex:
+```sh
+^5[1-5][0-9]{14}|^(222[1-9]|22[3-9]\\d|2[3-6]\\d{2}|27[0-1]\\d|2720)[0-9]{12}$
+```
 ![Screenshot](https://github.com/gulizay91/statsig-poc/blob/main/etc/statsig-feature-gate.png?raw=true)
 #### Sample Code
 ```sh
