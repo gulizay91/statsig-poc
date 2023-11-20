@@ -8,6 +8,9 @@ public class ApplicationLifetimeService : IHostedService
   private readonly IConfiguration _configuration;
   private readonly ILogger<ApplicationLifetimeService> _logger;
 
+  private bool _statsigInitialized;
+  public bool StatsigInitialized => _statsigInitialized;
+
   public ApplicationLifetimeService(IHostApplicationLifetime applicationLifetime,
     ILogger<ApplicationLifetimeService> logger, IConfiguration configuration)
   {
@@ -21,32 +24,54 @@ public class ApplicationLifetimeService : IHostedService
     _applicationLifetime.ApplicationStarted.Register(async () =>
     {
       _logger.LogInformation("Termination delay complete, continuing stopping process");
-      await InitStatsig();
+      await InitializeStatsigAsync();
     });
+
     // register a callback that sleeps for 30 seconds
-    _applicationLifetime.ApplicationStopping.Register(() =>
+    _applicationLifetime.ApplicationStopping.Register(async () =>
     {
       _logger.LogInformation("SIGTERM received, waiting for 30 seconds");
-      Thread.Sleep(30_000);
+      await StatsigServer.Shutdown();
+      await Task.Delay(30_000, cancellationToken); // Pass cancellation token
       _logger.LogInformation("Termination delay complete, continuing stopping process");
     });
+
     return Task.CompletedTask;
   }
 
   // Required to satisfy interface
   public Task StopAsync(CancellationToken cancellationToken)
   {
+    _statsigInitialized = false; // Set to false during shutdown
     return Task.CompletedTask;
   }
 
-  private async Task InitStatsig()
+  private async Task InitializeStatsigAsync()
   {
-    var apiUrl = _configuration.GetSection("StatsigSettings:Url").Value;
-    Console.Out.WriteLine($"StatsigSettings:Url: {apiUrl}");
-    var apiKey = _configuration.GetSection("StatsigSettings:ApiKey").Value;
-    Console.Out.WriteLine($"StatsigSettings:ApiKey: {apiKey}");
-    var options = new StatsigServerOptions(environment: new StatsigEnvironment(EnvironmentTier.Production));
-    await StatsigServer.Initialize(apiKey, options);
-    Console.Out.WriteLine("Registered Statsig...");
+    try
+    {
+      var apiUrl = _configuration.GetSection("StatsigSettings:Url").Value;
+      var apiKey = _configuration.GetSection("StatsigSettings:ApiKey").Value;
+
+      if (string.IsNullOrEmpty(apiKey))
+      {
+        _logger.LogError("StatsigSettings:ApiKey is missing or empty");
+        return;
+      }
+
+      _logger.LogInformation("StatsigSettings:Url: {Url}", apiUrl);
+      _logger.LogInformation("StatsigSettings:ApiKey: {ApiKey}", apiKey);
+
+      var options = new StatsigServerOptions(environment: new StatsigEnvironment(EnvironmentTier.Production));
+      await StatsigServer.Initialize(apiKey, options);
+
+      _statsigInitialized = true;
+      _logger.LogInformation("Registered Statsig...");
+    }
+    catch (Exception ex)
+    {
+      _logger.LogError(ex, "Error initializing Statsig");
+      _statsigInitialized = false; // Set to false on initialization failure
+    }
   }
 }
