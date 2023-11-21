@@ -25,7 +25,8 @@ void Menu()
   Console.WriteLine("2- Test-FeatureGate Concurrent 50x100");
   Console.WriteLine("3- Test-Experiment");
   Console.WriteLine("4- Test-Experiment Concurrent 50x100");
-  Console.WriteLine("5- Test-FeatureGate-PrivateAttributes: mastercard&CustomEvent");
+  Console.WriteLine("5- Test-FeatureGate-PrivateAttributes: mastercard & CustomEvent");
+  Console.WriteLine("6- Test-FeatureGate & Experiment: mastercard & show-campaign-mc");
   Console.WriteLine("/*******************************************************************/");
   Console.Write("Select Process: ");
   key = Console.ReadLine();
@@ -85,7 +86,30 @@ void Run(string key)
         );
       }
       Console.WriteLine("User: {0}, feature-gate:{1}, creditCard: {2}, result: {3}", statsigUser.UserID, featureGateName, maskedCard, isMasterCard.ToString());
-      
+      break;
+    case "6":
+      Console.Write("input CreditCard: ");
+      var cc = Console.ReadLine();
+      var maskedCC = MaskedCard(cc);
+      var userMcGate = GenerateUsers(1).First();
+      userMcGate.AddPrivateAttribute("creditCard", cc);
+      userMcGate.AddCustomProperty("maskedCreditCard", maskedCC);
+      experimentName = "show-campaign-mc";
+      var experimentConfig = StatsigServer.GetExperimentSync(userMcGate, experimentName);
+      if (experimentConfig.IsUserInExperiment)
+      {
+        StatsigServer.LogEvent(
+          userMcGate,
+          "MasterCardCustomEvent",
+          $"sku-{Guid.NewGuid().ToString()}",
+          new Dictionary<string, string>() {
+            { "price", "6.99" },
+            { "item_name", "diet_coke_48_pack" }
+          }
+        );
+      }
+      var isExperimentEnabled = experimentConfig.Get<bool>("isEnabled");
+      Console.WriteLine("User: {0}, experiment-group&value: {1}&{2}, result: {3}", userMcGate.UserID, experimentConfig.GroupName, isExperimentEnabled, JsonSerializer.Serialize(experimentConfig));
       break;
     case "q" or "Q":
       Console.WriteLine("Bye");

@@ -135,3 +135,43 @@ else
 
 #### Metrics Custom Event MasterCardCustomEvent
 ![Screenshot](https://github.com/gulizay91/statsig-poc/blob/main/etc/metric-mastercard-event.png?raw=true)
+
+
+## FeatureGate: mastercard & Experiment: show-campaign-mc
+Create new experiment which name is "show-campaign-mc".
+A group is added with the Control group and the "Test group. Also, previously created feature gate named "mastercard" is added. Extra parameters can be added if desired, for example the "isEnabled" parameter is added as boolean.
+
+![Screenshot](https://github.com/gulizay91/statsig-poc/blob/main/etc/experiment-show-campaign.png?raw=true)
+
+![Screenshot](https://github.com/gulizay91/statsig-poc/blob/main/etc/show-campaign-pulse-result.png?raw=true)
+
+#### Sample Code
+```sh
+var creditCard = "5114496353984312";
+var maskedCard = string.Concat(creditCard[..4], new string('*', creditCard.Length - 4));
+var userMcGate = new StatsigUser { UserID = userId, Country = "TR" };
+userMcGate.AddPrivateAttribute("creditCard", creditCard);
+userMcGate.AddCustomProperty("maskedCreditCard", maskedCard);
+experimentName = "show-campaign-mc";
+var experimentConfig = StatsigServer.GetExperimentSync(userMcGate, experimentName);
+if (experimentConfig.IsUserInExperiment)
+{
+  StatsigServer.LogEvent(
+    userMcGate,
+    "MasterCardCustomEvent",
+    $"sku-{Guid.NewGuid().ToString()}",
+    new Dictionary<string, string>() {
+      { "price", "6.99" },
+      { "item_name", "diet_coke_48_pack" }
+    }
+  );
+}
+var isExperimentEnabled = experimentConfig.Get<bool>("isEnabled");
+Console.WriteLine("User: {0}, experiment-group&value: {1}&{2}, result: {3}", userMcGate.UserID, experimentConfig.GroupName, isExperimentEnabled, JsonSerializer.Serialize(experimentConfig));
+
+```
+#### FeatureGate mastercard Log with Experiement show-campaign-mc
+![Screenshot](https://github.com/gulizay91/statsig-poc/blob/main/etc/feature-result-with-experiment.png?raw=true)
+
+#### Metrics Custom Event MasterCardCustomEvent
+![Screenshot](https://github.com/gulizay91/statsig-poc/blob/main/etc/metric-mastercard-event2.png?raw=true)
