@@ -32,7 +32,7 @@ public class ApplicationLifetimeService : IHostedService
     {
       _logger.LogInformation("SIGTERM received, waiting for 30 seconds");
       await StatsigServer.Shutdown();
-      await Task.Delay(30_000, cancellationToken); // Pass cancellation token
+      Thread.Sleep(30_000);
       _logger.LogInformation("Termination delay complete, continuing stopping process");
     });
 
