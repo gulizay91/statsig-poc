@@ -175,3 +175,29 @@ Console.WriteLine("User: {0}, experiment-group&value: {1}&{2}, result: {3}", use
 
 #### Metrics Custom Event MasterCardCustomEvent
 ![Screenshot](https://github.com/gulizay91/statsig-poc/blob/main/etc/metric-mastercard-event2.png?raw=true)
+
+
+### FeatureGate & Segment & Experiment matrix-experiment
+#### Scenario
+You have to chose pill, blue or red. You take the blue pill, the story ends!
+The human can pass the gate who took the red pill before when they use landline phones.
+After pass the gate, you can go zion or power plant. Only Neo can access to power plant.
+If your path goes to the "power-plant" and you are not the chosen one, you will become Agent Smith.
+But If your path goes to the "zion", you just only be awakened.
+![Screenshot](https://github.com/gulizay91/statsig-poc/blob/main/etc/statsig-matrix-drawio.png?raw=true)
+
+The Architect create the matrix
+#### FeatureGate
+![Screenshot](https://github.com/gulizay91/statsig-poc/blob/main/etc/matrix-landline-phone-gate.png?raw=true)
+
+#### Segment
+![Screenshot](https://github.com/gulizay91/statsig-poc/blob/main/etc/neo-segment.png?raw=true)
+
+#### Experiment
+![Screenshot](https://github.com/gulizay91/statsig-poc/blob/main/etc/matrix-experiment.png?raw=true)
+
+#### Segment attached to Experiment
+![Screenshot](https://github.com/gulizay91/statsig-poc/blob/main/etc/matrix-experiment-conditional-segment.png?raw=true)
+
+#### Console log
+![Screenshot](https://github.com/gulizay91/statsig-poc/blob/main/etc/statsig-matrix-console-log.png?raw=true)

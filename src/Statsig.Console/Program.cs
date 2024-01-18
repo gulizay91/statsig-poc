@@ -27,6 +27,7 @@ void Menu()
   Console.WriteLine("4- Test-Experiment Concurrent 50x100");
   Console.WriteLine("5- Test-FeatureGate-PrivateAttributes: mastercard & CustomEvent");
   Console.WriteLine("6- Test-FeatureGate & Experiment: mastercard & show-campaign-mc");
+  Console.WriteLine("7- Test-FeatureGate & Segment & Experiment: matrix-experiment");
   Console.WriteLine("/*******************************************************************/");
   Console.Write("Select Process: ");
   key = Console.ReadLine();
@@ -36,6 +37,7 @@ void Run(string key)
 {
   var featureGateName = string.Empty;
   var experimentName = string.Empty;
+  
   switch (key)
   {
     case "1":
@@ -111,6 +113,11 @@ void Run(string key)
       var isExperimentEnabled = experimentConfig.Get<bool>("isEnabled");
       Console.WriteLine("User: {0}, experiment-group&value: {1}&{2}, result: {3}", userMcGate.UserID, experimentConfig.GroupName, isExperimentEnabled, JsonSerializer.Serialize(experimentConfig));
       break;
+    case "7":
+      Console.Write("input id: ");
+      var id = Console.ReadLine();
+      RunExperimentMatrix(Convert.ToInt32(id));
+      break;
     case "q" or "Q":
       Console.WriteLine("Bye");
       StatsigServer.Shutdown();
@@ -119,6 +126,7 @@ void Run(string key)
       Console.WriteLine("Wrong Choice");
       break;
   }
+  
 }
 
 async Task InitStatsig()
@@ -188,9 +196,64 @@ async void RunExperiment(int processCount, int parallelUserCount, string experim
   stopWatch.Stop();
 }
 
+void RunExperimentMatrix(int id)
+{
+  var experimentName = "matrix-experiment";
+  var pill = id is > 0 and < 100 ?Pill.Red.ToString() : Pill.Blue.ToString();
+  var userStatsig = new StatsigUser { UserID = id.ToString() };
+  userStatsig.AddCustomProperty("pill", pill);
+  var experimentConfig = StatsigServer.GetExperimentSync(userStatsig, experimentName);
+
+  switch (experimentConfig.GroupName)
+  {
+    case "zion":
+      Console.ForegroundColor = ConsoleColor.Red;
+      Console.WriteLine("The human {0} woken, experiment-group: {1}, result: {2}", userStatsig.UserID, experimentConfig.GroupName, JsonSerializer.Serialize(experimentConfig));
+      break;
+    case "power-plant":
+    {
+      var segmentExposures = experimentConfig.SecondaryExposures.Find(item => item["gate"] == "segment:neo-segment");
+      var isUserInSegment = segmentExposures?["gateValue"];
+      //var who = experimentConfig.Value["who"].ToString();
+      if (isUserInSegment is "true") // neo
+      {
+        Console.ForegroundColor = ConsoleColor.DarkGreen;
+        Console.WriteLine("Welcome Neo {0} , experiment-group: {1}, result: {2}", userStatsig.UserID, experimentConfig.GroupName, JsonSerializer.Serialize(experimentConfig));
+      }
+      else // isUserInSegment is "false" agent-smith
+      {
+        Console.ForegroundColor = ConsoleColor.Magenta;
+        Console.WriteLine("Agent-Smith {0} , experiment-group: {1}, result: {2}", userStatsig.UserID, experimentConfig.GroupName, JsonSerializer.Serialize(experimentConfig));
+      }
+    }
+    break;
+    case "Targeting Gate (matrix-landline-phone-gate)":
+      Console.ForegroundColor = ConsoleColor.DarkCyan;
+      Console.WriteLine("User {0} took blue pill zZz... -> result: {1}", userStatsig.UserID, JsonSerializer.Serialize(experimentConfig));
+      break;
+    case "Unstarted":
+      Console.BackgroundColor = ConsoleColor.White;
+      Console.ForegroundColor = ConsoleColor.Black;
+      Console.WriteLine("Sorry {0}, The Architect is busy. -> result: {1}", userStatsig.UserID, JsonSerializer.Serialize(experimentConfig));
+      break;
+    default: // dont expect
+      Console.ForegroundColor = ConsoleColor.White;
+      Console.WriteLine("User {0} is limbo. -> result: {1}", userStatsig.UserID, JsonSerializer.Serialize(experimentConfig));
+      break;
+  }
+
+  Console.ResetColor();
+}
+
 enum CountryCode
 {
   TR,
   US
+}
+
+enum Pill
+{
+  Blue,
+  Red
 }
 
